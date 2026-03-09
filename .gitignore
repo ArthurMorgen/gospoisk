@@ -19,9 +19,32 @@ web/.env.local
 .vscode/
 *.swp
 
-# Debug
-debug_*.html
+# Debug / Test
+debug_*
+test_*
+*_test.py
+simple_test.py
+simple_filter_test.py
+direct_test.py
+fix_*.py
+check_*.py
+config_test.py
 *.log
+
+# Artifacts
+*.zip
+*.db
+create_deploy_zip.ps1
+setup_telegram.py
+
+# Docs (internal)
+DEPLOY_SERVER.md
+RTS_*.md
+SELENIUM_*.md
+*_ИНСТРУКЦИЯ.md
+ГОТОВ_К_ЗАПУСКУ.md
+КАК_ПОЛУЧИТЬ_*.md
+ПЛАН_ТЕСТИРОВАНИЯ.md
 
 # OS
 .DS_Store
