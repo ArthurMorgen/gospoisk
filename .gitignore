@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.env
+venv/
+.venv/
+
+# Node
+web/node_modules/
+web/.next/
+web/out/
+web/.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Debug
+debug_*.html
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+web/.vercel/
