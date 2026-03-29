@@ -26,6 +26,27 @@ export interface TendersResponse {
   cached: boolean;
 }
 
+export interface PredictionResult {
+  drop_pct: number;
+  category: string;
+  confidence: 'high' | 'medium' | 'low';
+}
+
+export async function predictBatch(tenders: { title: string; price: number }[]): Promise<(PredictionResult | null)[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/predict/batch`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tenders),
+    });
+    if (!res.ok) return tenders.map(() => null);
+    const data = await res.json();
+    return data.predictions;
+  } catch {
+    return tenders.map(() => null);
+  }
+}
+
 export async function searchTenders(params: {
   keywords: string[];
   platforms?: string[];

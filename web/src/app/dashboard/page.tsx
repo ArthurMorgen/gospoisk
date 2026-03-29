@@ -15,6 +15,7 @@ import {
   X,
   Sparkles,
   ArrowUp,
+  ArrowDown,
   ArrowDownUp,
   Zap,
   Lock,
@@ -27,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { searchTenders, type Tender, type SortOption } from "@/lib/api";
+import { searchTenders, predictBatch, type Tender, type SortOption, type PredictionResult } from "@/lib/api";
 import { canSearch, recordSearch, getSearchesLeft, getLimit, isAdmin, FREE_SEARCH_LIMIT } from "@/lib/usage";
 import { useAuth } from "@/lib/auth-context";
 import { saveSearch } from "@/lib/saved-searches";
@@ -72,7 +73,7 @@ function formatPrice(price: number): string {
   }).format(price);
 }
 
-function TenderCard({ tender, index }: { tender: Tender; index: number }) {
+function TenderCard({ tender, index, prediction }: { tender: Tender; index: number; prediction?: PredictionResult | null }) {
   const displayPlatform = getPlatformName(tender.platform);
   const platformColor = PLATFORM_COLORS[displayPlatform] || "bg-zinc-400";
 
@@ -107,6 +108,16 @@ function TenderCard({ tender, index }: { tender: Tender; index: number }) {
                   <span className="flex items-center gap-1 rounded-md bg-zinc-50 px-1.5 py-0.5 text-xs font-semibold text-zinc-700">
                     <Banknote className="h-3 w-3 text-zinc-400" />
                     {formatPrice(tender.price)}
+                  </span>
+                )}
+                {prediction && prediction.drop_pct > 0 && (
+                  <span className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold ${
+                    prediction.confidence === 'high' ? 'bg-green-50 text-green-700' :
+                    prediction.confidence === 'medium' ? 'bg-amber-50 text-amber-700' :
+                    'bg-zinc-50 text-zinc-500'
+                  }`}>
+                    <ArrowDown className="h-3 w-3" />
+                    ~{prediction.drop_pct}%
                   </span>
                 )}
                 {tender.deadline && (
@@ -179,6 +190,7 @@ function DashboardPage() {
   const [searchesLeft, setSearchesLeft] = useState(FREE_SEARCH_LIMIT);
   const userEmail = user?.email;
   const [saved, setSaved] = useState(false);
+  const [predictions, setPredictions] = useState<(PredictionResult | null)[]>([]);
   const [saving, setSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -272,6 +284,12 @@ function DashboardPage() {
       setPage(pg);
       setSearchTime(data.search_time_ms);
       setWasCached(data.cached);
+      // Прогноз снижения цены (в фоне)
+      if (data.tenders.length > 0) {
+        predictBatch(data.tenders.map(t => ({ title: t.title, price: t.price }))).then(setPredictions).catch(() => {});
+      } else {
+        setPredictions([]);
+      }
       if (pg === 1) {
         recordSearch();
         setSearchesLeft(getSearchesLeft(userEmail));
@@ -635,6 +653,7 @@ function DashboardPage() {
                   key={tender.tender_id}
                   tender={tender}
                   index={(page - 1) * ITEMS_PER_PAGE + i + 1}
+                  prediction={predictions[i]}
                 />
               ))
             )}

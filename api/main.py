@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from concurrent.futures import ThreadPoolExecutor
 
 from config import PLATFORMS
+from ai.predictor import get_predictor
 from parsers.suppliers_portal_selenium_parser import SuppliersPortalSeleniumParser
 from parsers.eis_parser import EISParser
 
@@ -288,6 +289,46 @@ async def search_tenders(
         search_time_ms=elapsed,
         cached=was_cached,
     )
+
+
+# === Прогноз снижения цены ===
+
+class PredictRequest(BaseModel):
+    title: str
+    price: float
+    proc_type: Optional[str] = "44-FZ"
+
+
+class PredictResponse(BaseModel):
+    drop_pct: float
+    category: str
+    confidence: str
+
+
+@app.post("/api/predict", response_model=PredictResponse)
+async def predict_price_drop(body: PredictRequest):
+    """Прогноз % снижения цены тендера на торгах"""
+    predictor = get_predictor()
+    result = predictor.predict(body.title, body.price, body.proc_type)
+    if not result:
+        raise HTTPException(status_code=503, detail="Модель прогноза недоступна")
+    return PredictResponse(**result)
+
+
+@app.post("/api/predict/batch")
+async def predict_batch(tenders: List[dict]):
+    """Пакетный прогноз для списка тендеров"""
+    predictor = get_predictor()
+    results = []
+    for t in tenders[:50]:
+        title = t.get('title', '')
+        price = float(t.get('price', 0) or 0)
+        if price > 0 and title:
+            pred = predictor.predict(title, price)
+            results.append(pred)
+        else:
+            results.append(None)
+    return {"predictions": results}
 
 
 if __name__ == "__main__":
