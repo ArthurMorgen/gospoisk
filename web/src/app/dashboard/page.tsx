@@ -29,7 +29,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { searchTenders, predictBatch, type Tender, type SortOption, type PredictionResult } from "@/lib/api";
-import { canSearch, recordSearch, getSearchesLeft, getLimit, isAdmin, FREE_SEARCH_LIMIT } from "@/lib/usage";
+import { canSearch, recordSearch, getSearchesLeft, getLimit, isAdmin, isPro, FREE_SEARCH_LIMIT } from "@/lib/usage";
 import { useAuth } from "@/lib/auth-context";
 import { saveSearch } from "@/lib/saved-searches";
 
@@ -73,7 +73,7 @@ function formatPrice(price: number): string {
   }).format(price);
 }
 
-function TenderCard({ tender, index, prediction }: { tender: Tender; index: number; prediction?: PredictionResult | null }) {
+function TenderCard({ tender, index, prediction, showPrediction }: { tender: Tender; index: number; prediction?: PredictionResult | null; showPrediction?: boolean }) {
   const displayPlatform = getPlatformName(tender.platform);
   const platformColor = PLATFORM_COLORS[displayPlatform] || "bg-zinc-400";
 
@@ -110,12 +110,18 @@ function TenderCard({ tender, index, prediction }: { tender: Tender; index: numb
                     {formatPrice(tender.price)}
                   </span>
                 )}
-                {prediction && prediction.drop_pct > 0 && (
+                {prediction && prediction.drop_pct > 0 && showPrediction && (
                   <span className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold ${
                     prediction.confidence === 'high' ? 'bg-green-50 text-green-700' :
                     prediction.confidence === 'medium' ? 'bg-amber-50 text-amber-700' :
                     'bg-zinc-50 text-zinc-500'
                   }`}>
+                    <ArrowDown className="h-3 w-3" />
+                    ~{prediction.drop_pct}%
+                  </span>
+                )}
+                {prediction && prediction.drop_pct > 0 && !showPrediction && (
+                  <span className="flex items-center gap-1 rounded-md bg-zinc-100 px-1.5 py-0.5 text-xs font-semibold text-zinc-400 blur-[3px] select-none">
                     <ArrowDown className="h-3 w-3" />
                     ~{prediction.drop_pct}%
                   </span>
@@ -654,6 +660,7 @@ function DashboardPage() {
                   tender={tender}
                   index={(page - 1) * ITEMS_PER_PAGE + i + 1}
                   prediction={predictions[i]}
+                  showPrediction={isPro(userEmail)}
                 />
               ))
             )}

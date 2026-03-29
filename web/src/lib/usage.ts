@@ -70,4 +70,9 @@ export function resetSearches(): void {
   setUsage({ date: today(), count: 0 });
 }
 
+export function isPro(email?: string | null): boolean {
+  // Пока: только админ = про. Позже: проверка подписки через Supabase
+  return isAdmin(email);
+}
+
 export const FREE_SEARCH_LIMIT = FREE_LIMIT;
