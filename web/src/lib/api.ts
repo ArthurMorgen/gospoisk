@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://apigospoisk.ru";
 
 export interface Tender {
   tender_id: string;
@@ -35,6 +35,7 @@ export async function searchTenders(params: {
   sort?: SortOption;
   min_price?: number;
   max_price?: number;
+  signal?: AbortSignal;
 }): Promise<TendersResponse> {
   const searchParams = new URLSearchParams();
   if (params.page) searchParams.set("page", String(params.page));
@@ -47,15 +48,32 @@ export async function searchTenders(params: {
   if (params.min_price) body.min_price = params.min_price;
   if (params.max_price) body.max_price = params.max_price;
 
-  const res = await fetch(`${API_BASE}/api/search?${searchParams.toString()}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  const controller = params.signal ? undefined : new AbortController();
+  const signal = params.signal || controller?.signal;
+  const timeout = setTimeout(() => controller?.abort(), 120_000);
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: "Ошибка сервера" }));
-    throw new Error(err.detail || "Ошибка поиска");
+  try {
+    const res = await fetch(`${API_BASE}/api/search?${searchParams.toString()}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal,
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Ошибка сервера" }));
+      throw new Error(err.detail || "Ошибка поиска");
+    }
+    return res.json();
+  } catch (e: unknown) {
+    if (e instanceof DOMException && e.name === "AbortError") {
+      throw new Error("Поиск отменён");
+    }
+    if (e instanceof TypeError && (e.message.includes("fetch") || e.message.includes("network") || e.message.includes("Failed"))) {
+      throw new Error("Нет связи с сервером. Проверьте интернет и попробуйте снова.");
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeout);
   }
-  return res.json();
 }

@@ -244,7 +244,7 @@ class EISParser(BaseParser):
                 return None
             
             # Получаем текст названия тендера
-            title = title_elem.get_text(strip=True)
+            title = ' '.join(title_elem.get_text(separator=' ', strip=True).split())
             
             # Отфильтровываем статусы процедур 
             status_phrases = [
@@ -270,7 +270,7 @@ class EISParser(BaseParser):
                 for selector in real_title_selectors:
                     real_title_elem = row.select_one(selector)
                     if real_title_elem:
-                        potential_title = real_title_elem.get_text(strip=True)
+                        potential_title = ' '.join(real_title_elem.get_text(separator=' ', strip=True).split())
                         if (potential_title and len(potential_title) > 10 and 
                             not any(phrase in potential_title.lower() for phrase in status_phrases)):
                             title = potential_title
@@ -327,7 +327,7 @@ class EISParser(BaseParser):
             
             # Извлекаем заказчика
             customer_elem = row.find('div', class_='registry-entry__body-href')
-            customer = customer_elem.get_text(strip=True) if customer_elem else ''
+            customer = ' '.join(customer_elem.get_text(separator=' ', strip=True).split()) if customer_elem else ''
             
             # Извлекаем дату окончания подачи заявок
             # Ищем блок с заголовком "Окончание подачи заявок"

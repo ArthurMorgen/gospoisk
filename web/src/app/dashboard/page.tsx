@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -182,6 +182,8 @@ function DashboardPage() {
   const [saving, setSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const [elapsed, setElapsed] = useState(0);
 
   const searchParams = useSearchParams();
 
@@ -231,16 +233,29 @@ function DashboardPage() {
     }
   };
 
+  const cancelSearch = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setLoading(false);
+  }, []);
+
   const doSearch = async (kws: string[], pg: number = 1, sortOpt?: SortOption) => {
     if (kws.length === 0) return;
     if (pg === 1 && !canSearch(userEmail)) {
       setShowPaywall(true);
       return;
     }
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
     setSearched(true);
     setActiveKeywords(kws);
+    setElapsed(0);
+
+    const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
 
     try {
       const data = await searchTenders({
@@ -249,6 +264,7 @@ function DashboardPage() {
         page: pg,
         per_page: ITEMS_PER_PAGE,
         sort: sortOpt || sort,
+        signal: controller.signal,
       });
       setTenders(data.tenders);
       setTotal(data.total);
@@ -263,9 +279,11 @@ function DashboardPage() {
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Ошибка поиска";
-      setError(msg);
+      if (msg !== "Поиск отменён") setError(msg);
     } finally {
+      clearInterval(timer);
       setLoading(false);
+      abortRef.current = null;
     }
   };
 
@@ -556,15 +574,43 @@ function DashboardPage() {
 
           {/* Error */}
           {error && (
-            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
-              {error}
+            <div className="mb-4 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+              <span>{error}</span>
+              <button
+                onClick={() => doSearch(activeKeywords, page)}
+                className="shrink-0 rounded-lg bg-red-100 px-3 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-200"
+              >
+                Повторить
+              </button>
             </div>
           )}
 
           {/* Tenders List */}
           <div className="space-y-2">
             {loading ? (
-              Array.from({ length: 5 }).map((_, i) => <TenderSkeleton key={i} />)
+              <>
+                <div className="flex flex-col items-center gap-4 py-16">
+                  <div className="relative flex h-14 w-14 items-center justify-center">
+                    <div className="absolute inset-0 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900" />
+                    <Search className="h-5 w-5 text-zinc-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-zinc-700">
+                      {elapsed < 5 ? "Подключаемся к площадкам..." : elapsed < 20 ? "Ищем по площадкам..." : elapsed < 40 ? "Парсим результаты..." : "Почти готово..."}
+                    </p>
+                    <p className="mt-1 tabular-nums text-xs text-zinc-400">{elapsed} сек</p>
+                  </div>
+                  <button
+                    onClick={cancelSearch}
+                    className="mt-1 rounded-full border border-zinc-200 px-4 py-1.5 text-xs font-medium text-zinc-500 transition-all hover:border-zinc-400 hover:text-zinc-700"
+                  >
+                    Отменить
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {Array.from({ length: 3 }).map((_, i) => <TenderSkeleton key={i} />)}
+                </div>
+              </>
             ) : searched && tenders.length === 0 ? (
               <div className="py-20 text-center">
                 <Search className="mx-auto mb-3 h-10 w-10 text-zinc-200" />

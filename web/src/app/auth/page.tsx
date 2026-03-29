@@ -44,9 +44,11 @@ export default function AuthPage() {
           router.push("/dashboard");
         }
       } else {
-        const { error: err } = await signUp(email, password);
+        const { error: err, confirmed } = await signUp(email, password);
         if (err) {
           setError(translateError(err));
+        } else if (confirmed) {
+          router.push("/dashboard");
         } else {
           setSuccess("Проверьте почту для подтверждения аккаунта");
         }

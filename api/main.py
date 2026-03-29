@@ -41,13 +41,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS обрабатывается nginx
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
 # === Модели ===
@@ -105,9 +106,11 @@ tender_cache: dict = {}
 CACHE_TTL_SECONDS = 300  # 5 минут
 
 
-def cache_key(keywords: List[str]) -> str:
+def cache_key(keywords: List[str], platforms: List[str] = None) -> str:
     normalized = sorted([k.strip().lower() for k in keywords if k.strip()])
-    return hashlib.md5("|".join(normalized).encode()).hexdigest()
+    plat = sorted(platforms) if platforms else ["all"]
+    raw = "|".join(normalized) + "::" + ",".join(plat)
+    return hashlib.md5(raw.encode()).hexdigest()
 
 
 def is_cache_valid(key: str) -> bool:
@@ -220,7 +223,7 @@ async def search_tenders(
     if len(keywords) > 20:
         raise HTTPException(status_code=400, detail="Максимум 20 ключевых слов")
 
-    key = cache_key(keywords)
+    key = cache_key(keywords, body.platforms)
     was_cached = is_cache_valid(key)
 
     if not was_cached:
@@ -252,11 +255,20 @@ async def search_tenders(
 
     # Сортировка
     if body.sort == "price_asc":
-        all_tenders.sort(key=lambda t: t.get('price', 0) or float('inf'))
+        with_price = [t for t in all_tenders if t.get('price', 0) and t['price'] > 0]
+        no_price = [t for t in all_tenders if not t.get('price', 0) or t['price'] <= 0]
+        with_price.sort(key=lambda t: t['price'])
+        all_tenders = with_price + no_price
     elif body.sort == "price_desc":
-        all_tenders.sort(key=lambda t: t.get('price', 0) or 0, reverse=True)
+        with_price = [t for t in all_tenders if t.get('price', 0) and t['price'] > 0]
+        no_price = [t for t in all_tenders if not t.get('price', 0) or t['price'] <= 0]
+        with_price.sort(key=lambda t: t['price'], reverse=True)
+        all_tenders = with_price + no_price
     elif body.sort == "deadline":
-        all_tenders.sort(key=lambda t: t.get('deadline', '') or 'z')
+        with_deadline = [t for t in all_tenders if (t.get('deadline') or '').strip()]
+        no_deadline = [t for t in all_tenders if not (t.get('deadline') or '').strip()]
+        with_deadline.sort(key=lambda t: t['deadline'])
+        all_tenders = with_deadline + no_deadline
 
     # Пагинация
     total = len(all_tenders)

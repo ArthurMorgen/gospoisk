@@ -1,5 +1,5 @@
 const STORAGE_KEY = "gospoisk_usage";
-const FREE_LIMIT = 3;
+const FREE_LIMIT = 10;
 const AUTH_LIMIT = 50;
 
 // Админские email — безлимитный доступ
