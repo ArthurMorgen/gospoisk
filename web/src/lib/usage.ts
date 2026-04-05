@@ -3,7 +3,12 @@ const FREE_LIMIT = 10;
 const AUTH_LIMIT = 50;
 
 // Админские email — безлимитный доступ
-const ADMIN_EMAILS = ["moshentsov2006@gmail.com"];
+const ADMIN_EMAILS = [
+  "moshentsov2006@gmail.com",
+  "alla-moshencova@yandex.ru",
+  "doc@orionkanc.ru",
+  "pochta7.07@mail.ru",
+];
 
 interface UsageData {
   date: string;

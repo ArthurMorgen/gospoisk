@@ -47,6 +47,17 @@ export async function predictBatch(tenders: { title: string; price: number }[]):
   }
 }
 
+export async function fetchRegions(): Promise<string[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/regions`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.regions || [];
+  } catch {
+    return [];
+  }
+}
+
 export async function searchTenders(params: {
   keywords: string[];
   platforms?: string[];
@@ -56,6 +67,7 @@ export async function searchTenders(params: {
   sort?: SortOption;
   min_price?: number;
   max_price?: number;
+  region?: string;
   signal?: AbortSignal;
 }): Promise<TendersResponse> {
   const searchParams = new URLSearchParams();
@@ -68,6 +80,7 @@ export async function searchTenders(params: {
   if (params.sort && params.sort !== "relevance") body.sort = params.sort;
   if (params.min_price) body.min_price = params.min_price;
   if (params.max_price) body.max_price = params.max_price;
+  if (params.region) body.region = params.region;
 
   const controller = params.signal ? undefined : new AbortController();
   const signal = params.signal || controller?.signal;

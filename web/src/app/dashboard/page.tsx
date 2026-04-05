@@ -28,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { searchTenders, predictBatch, type Tender, type SortOption, type PredictionResult } from "@/lib/api";
+import { searchTenders, predictBatch, fetchRegions, type Tender, type SortOption, type PredictionResult } from "@/lib/api";
 import { canSearch, recordSearch, getSearchesLeft, getLimit, isAdmin, isPro, FREE_SEARCH_LIMIT } from "@/lib/usage";
 import { useAuth } from "@/lib/auth-context";
 import { saveSearch } from "@/lib/saved-searches";
@@ -198,6 +198,8 @@ function DashboardPage() {
   const [saved, setSaved] = useState(false);
   const [predictions, setPredictions] = useState<(PredictionResult | null)[]>([]);
   const [saving, setSaving] = useState(false);
+  const [region, setRegion] = useState("");
+  const [regions, setRegions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -208,6 +210,7 @@ function DashboardPage() {
   useEffect(() => {
     inputRef.current?.focus();
     setSearchesLeft(getSearchesLeft(userEmail));
+    fetchRegions().then(setRegions);
 
     const kwParam = searchParams.get("keywords");
     if (kwParam) {
@@ -282,6 +285,7 @@ function DashboardPage() {
         page: pg,
         per_page: ITEMS_PER_PAGE,
         sort: sortOpt || sort,
+        region: region || undefined,
         signal: controller.signal,
       });
       setTenders(data.tenders);
@@ -494,6 +498,18 @@ function DashboardPage() {
                     <span className="text-zinc-500">{p === "portal" ? "Портал" : "ЕИС"}</span>
                   </label>
                 ))}
+                {regions.length > 0 && (
+                  <select
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                    className="h-7 rounded-md border border-zinc-200 bg-white px-1.5 text-xs text-zinc-600 outline-none focus:border-zinc-400"
+                  >
+                    <option value="">Все регионы</option>
+                    {regions.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                )}
               </div>
               <Button
                 type="submit"

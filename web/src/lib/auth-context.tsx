@@ -12,6 +12,8 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<{ error: string | null; confirmed: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,8 +68,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const resetPassword = async (email: string) => {
+    if (!isSupabaseConfigured) return { error: "Supabase не настроен" };
+    const supabase = createClient()!;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset`,
+    });
+    return { error: error?.message ?? null };
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    if (!isSupabaseConfigured) return { error: "Supabase не настроен" };
+    const supabase = createClient()!;
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    return { error: error?.message ?? null };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, configured: isSupabaseConfigured, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, configured: isSupabaseConfigured, signUp, signIn, signOut, resetPassword, updatePassword }}>
       {children}
     </AuthContext.Provider>
   );

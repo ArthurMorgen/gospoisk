@@ -11,13 +11,13 @@ import { Footer } from "@/components/footer";
 const SITE_NAME = "ГосПоиск";
 
 export default function AuthPage() {
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resetPassword } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,18 +25,30 @@ export default function AuthPage() {
     setError(null);
     setSuccess(null);
 
-    if (!email || !password) {
-      setError("Заполните все поля");
+    if (!email) {
+      setError("Введите email");
       return;
     }
-    if (password.length < 6) {
+    if (mode !== "forgot" && !password) {
+      setError("Введите пароль");
+      return;
+    }
+    if (mode !== "forgot" && password.length < 6) {
       setError("Пароль должен быть не менее 6 символов");
       return;
     }
 
     setLoading(true);
     try {
-      if (mode === "login") {
+      if (mode === "forgot") {
+        if (!email) { setError("Введите email"); return; }
+        const { error: err } = await resetPassword(email);
+        if (err) {
+          setError(translateError(err));
+        } else {
+          setSuccess("Ссылка для восстановления отправлена на " + email);
+        }
+      } else if (mode === "login") {
         const { error: err } = await signIn(email, password);
         if (err) {
           setError(translateError(err));
@@ -75,12 +87,14 @@ export default function AuthPage() {
 
         <div className="rounded-2xl border border-zinc-200/60 bg-white p-7 shadow-xl shadow-zinc-100/50">
           <h1 className="mb-1 text-center text-lg font-bold text-zinc-900">
-            {mode === "login" ? "Войти в аккаунт" : "Создать аккаунт"}
+            {mode === "login" ? "Войти в аккаунт" : mode === "register" ? "Создать аккаунт" : "Восстановление пароля"}
           </h1>
           <p className="mb-6 text-center text-sm text-zinc-400">
             {mode === "login"
               ? "Введите email и пароль"
-              : "Зарегистрируйтесь для полного доступа"}
+              : mode === "register"
+              ? "Зарегистрируйтесь для полного доступа"
+              : "Введите email для сброса пароля"}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-3.5">
@@ -96,17 +110,19 @@ export default function AuthPage() {
                 autoFocus
               />
             </div>
-            <div className="relative">
-              <LockIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300" />
-              <input
-                type="password"
-                placeholder="Пароль"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:ring-1 focus:ring-zinc-400/20"
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
-              />
-            </div>
+            {mode !== "forgot" && (
+              <div className="relative">
+                <LockIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300" />
+                <input
+                  type="password"
+                  placeholder="Пароль"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:ring-1 focus:ring-zinc-400/20"
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                />
+              </div>
+            )}
 
             {error && (
               <div className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
@@ -128,14 +144,25 @@ export default function AuthPage() {
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  {mode === "login" ? "Войти" : "Зарегистрироваться"}
+                  {mode === "login" ? "Войти" : mode === "register" ? "Зарегистрироваться" : "Отправить ссылку"}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </>
               )}
             </Button>
           </form>
 
-          <div className="mt-5 text-center">
+          {mode === "login" && (
+            <div className="mt-3 text-center">
+              <button
+                onClick={() => { setMode("forgot"); setError(null); setSuccess(null); }}
+                className="text-xs text-zinc-400 transition-colors hover:text-zinc-600"
+              >
+                Забыли пароль?
+              </button>
+            </div>
+          )}
+
+          <div className="mt-4 text-center">
             <button
               onClick={() => {
                 setMode(mode === "login" ? "register" : "login");
@@ -146,15 +173,17 @@ export default function AuthPage() {
             >
               {mode === "login" ? (
                 <>Нет аккаунта? <span className="font-medium text-zinc-700">Создать</span></>
-              ) : (
+              ) : mode === "register" ? (
                 <>Уже есть аккаунт? <span className="font-medium text-zinc-700">Войти</span></>
+              ) : (
+                <>Вспомнили пароль? <span className="font-medium text-zinc-700">Войти</span></>
               )}
             </button>
           </div>
         </div>
 
         <p className="mt-6 text-center text-xs text-zinc-400">
-          Можно пользоваться без регистрации — 3 поиска в день
+          Можно пользоваться без регистрации — 10 поисков в день
         </p>
         <div className="mt-3 text-center">
           <Link href="/dashboard" className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-900">
