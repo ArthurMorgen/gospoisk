@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CATEGORIES } from "@/lib/categories";
 
 const SITE_NAME = "ГосПоиск";
 
@@ -76,7 +77,7 @@ export default function Home() {
                 Найти тендеры <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <p className="mt-4 text-sm text-zinc-400">Бесплатно. Без регистрации. 3 поиска в день.</p>
+            <p className="mt-4 text-sm text-zinc-400">Бесплатно. Без регистрации. 10 поисков в день.</p>
 
             {/* Floating keywords */}
             <div className="mt-10 flex flex-wrap justify-center gap-2">
@@ -89,6 +90,25 @@ export default function Home() {
                 </span>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Площадки — social proof */}
+      <section className="border-b border-zinc-100 bg-white py-8">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <p className="mb-5 text-center text-xs font-medium uppercase tracking-widest text-zinc-300">
+            Ищем на официальных площадках
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
+            <a href="https://zakupki.gov.ru" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-2 text-zinc-300 transition-colors hover:text-zinc-600">
+              <Shield className="h-5 w-5" />
+              <span className="text-sm font-semibold tracking-tight">ЕИС (zakupki.gov.ru)</span>
+            </a>
+            <a href="https://zakupki.mos.ru" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-2 text-zinc-300 transition-colors hover:text-zinc-600">
+              <Layers className="h-5 w-5" />
+              <span className="text-sm font-semibold tracking-tight">Портал поставщиков</span>
+            </a>
           </div>
         </div>
       </section>
@@ -188,6 +208,29 @@ export default function Home() {
                 <h3 className="mb-1.5 font-semibold text-zinc-900">{item.title}</h3>
                 <p className="text-sm leading-relaxed text-zinc-500">{item.desc}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Популярные категории */}
+      <section className="border-t border-zinc-100 bg-zinc-50/50 py-14 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <p className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
+            Категории
+          </p>
+          <h2 className="mb-8 text-center text-xl font-bold text-zinc-900 sm:text-3xl">
+            Популярные направления поиска
+          </h2>
+          <div className="flex flex-wrap justify-center gap-2.5">
+            {CATEGORIES.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/tenders/${cat.slug}`}
+                className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-600 transition-all hover:border-zinc-300 hover:shadow-sm hover:text-zinc-900"
+              >
+                {cat.title}
+              </Link>
             ))}
           </div>
         </div>

@@ -72,6 +72,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/contacts" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900">
+                  Контакты
+                </Link>
+              </li>
+              <li>
                 <a href="mailto:support@gospoisk.ru" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900">
                   support@gospoisk.ru
                 </a>
@@ -80,10 +85,18 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 flex items-center justify-between border-t border-zinc-100 pt-6">
+        <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-zinc-100 pt-6 sm:flex-row">
           <p className="text-xs text-zinc-300">
             © {new Date().getFullYear()} {SITE_NAME}. Все права защищены.
           </p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="text-xs text-zinc-300 transition-colors hover:text-zinc-500">
+              Политика конфиденциальности
+            </Link>
+            <Link href="/terms" className="text-xs text-zinc-300 transition-colors hover:text-zinc-500">
+              Пользовательское соглашение
+            </Link>
+          </div>
           <p className="text-xs text-zinc-300">
             Не является государственным ресурсом
           </p>
