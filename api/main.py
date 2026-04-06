@@ -228,8 +228,29 @@ def do_search(keywords: List[str], platforms: List[str] = None) -> List[dict]:
             seen.add(t['tender_id'])
             unique.append(t)
 
-    logger.info(f"Всего: {len(unique)} уникальных тендеров с {len(futures)} площадок")
-    return unique
+    # Пост-фильтрация: для многословных ключевых слов проверяем,
+    # что ВСЕ слова из фразы встречаются в названии или описании тендера
+    filtered = []
+    for t in unique:
+        text = (t.get('title', '') + ' ' + t.get('customer', '')).lower()
+        match = False
+        for kw in clean:
+            kw_words = kw.lower().split()
+            if len(kw_words) <= 1:
+                # Одно слово — достаточно простого вхождения
+                if kw.lower() in text:
+                    match = True
+                    break
+            else:
+                # Многословная фраза — все слова должны быть в тексте
+                if all(w in text for w in kw_words):
+                    match = True
+                    break
+        if match:
+            filtered.append(t)
+
+    logger.info(f"Всего: {len(unique)} уникальных, после фильтрации фраз: {len(filtered)}")
+    return filtered
 
 
 # === Эндпоинты ===

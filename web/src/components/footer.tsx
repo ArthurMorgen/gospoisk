@@ -40,6 +40,11 @@ export function Footer() {
                   Сохранённые поиски
                 </Link>
               </li>
+              <li>
+                <Link href="/blog" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900">
+                  Блог
+                </Link>
+              </li>
             </ul>
           </div>
 

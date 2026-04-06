@@ -23,6 +23,7 @@ import {
   LogOut,
   Bookmark,
   BookmarkCheck,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -200,6 +201,8 @@ function DashboardPage() {
   const [saving, setSaving] = useState(false);
   const [region, setRegion] = useState("");
   const [regions, setRegions] = useState<string[]>([]);
+  const [showPromo, setShowPromo] = useState(false);
+  const promoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -260,6 +263,28 @@ function DashboardPage() {
     setLoading(false);
   }, []);
 
+  const exportCSV = () => {
+    if (tenders.length === 0) return;
+    const header = "Название;Заказчик;Цена (₽);Площадка;Дедлайн;Ссылка";
+    const rows = tenders.map((t) => {
+      const title = (t.title || "").replace(/;/g, ",").replace(/\n/g, " ");
+      const customer = (t.customer || "").replace(/;/g, ",").replace(/\n/g, " ");
+      const price = t.price ? t.price.toLocaleString("ru-RU") : "—";
+      const platform = t.platform === "suppliers_portal" ? "Портал поставщиков" : t.platform === "ЕИС" ? "ЕИС" : t.platform;
+      const deadline = t.deadline || "—";
+      const url = t.url || "";
+      return `${title};${customer};${price};${platform};${deadline};${url}`;
+    });
+    const csv = "\uFEFF" + [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `gospoisk_${activeKeywords.join("_")}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const doSearch = async (kws: string[], pg: number = 1, sortOpt?: SortOption) => {
     if (kws.length === 0) return;
     if (pg === 1 && !canSearch(userEmail)) {
@@ -304,6 +329,14 @@ function DashboardPage() {
         recordSearch();
         setSearchesLeft(getSearchesLeft(userEmail));
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Промо-модалка через 15 сек (только для незалогиненных, один раз за сессию)
+        if (!userEmail && !sessionStorage.getItem("promo_shown")) {
+          if (promoTimerRef.current) clearTimeout(promoTimerRef.current);
+          promoTimerRef.current = setTimeout(() => {
+            setShowPromo(true);
+            sessionStorage.setItem("promo_shown", "1");
+          }, 15000);
+        }
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Ошибка поиска";
@@ -476,6 +509,36 @@ function DashboardPage() {
         </div>
       )}
 
+      {/* Promo Modal — после поиска для незалогиненных */}
+      {showPromo && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center" onClick={() => setShowPromo(false)}>
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
+          <div className="relative mx-4 mb-4 w-full max-w-sm rounded-2xl border border-zinc-200/50 bg-white p-6 shadow-2xl sm:mb-0" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowPromo(false)} className="absolute right-3 top-3 rounded-full p-1 text-zinc-300 hover:text-zinc-500">
+              <X className="h-4 w-4" />
+            </button>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-violet-50">
+              <Sparkles className="h-5 w-5 text-blue-600" />
+            </div>
+            <h3 className="mb-2 text-center text-base font-bold text-zinc-900">
+              Хотите получать больше?
+            </h3>
+            <p className="mb-5 text-center text-xs leading-relaxed text-zinc-500">
+              Зарегистрируйтесь бесплатно и получите {getLimit("user@")} поисков в день вместо {FREE_SEARCH_LIMIT}.
+              Плюс возможность сохранять поиски и экспортировать результаты.
+            </p>
+            <Link href="/auth">
+              <Button className="w-full rounded-xl bg-zinc-900 shadow-sm shadow-zinc-900/20">
+                Зарегистрироваться бесплатно
+              </Button>
+            </Link>
+            <p className="mt-3 text-center text-[10px] text-zinc-300">
+              Без спама. Только поиск тендеров.
+            </p>
+          </div>
+        </div>
+      )}
+
       <main className="mx-auto max-w-3xl px-4 py-6">
         {/* Search Form */}
         <div className="mb-6 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
@@ -593,6 +656,12 @@ function DashboardPage() {
                   </span>
                 </p>
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={exportCSV}
+                    className="flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 transition-all hover:bg-zinc-200 hover:text-zinc-700"
+                  >
+                    <Download className="h-3 w-3" /> CSV
+                  </button>
                   {user && (
                     <button
                       onClick={handleSave}
