@@ -33,6 +33,7 @@ import { searchTenders, predictBatch, fetchRegions, type Tender, type SortOption
 import { canSearch, recordSearch, getSearchesLeft, getLimit, isAdmin, isPro, FREE_SEARCH_LIMIT } from "@/lib/usage";
 import { useAuth } from "@/lib/auth-context";
 import { saveSearch } from "@/lib/saved-searches";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const SITE_NAME = "ГосПоиск";
 const ITEMS_PER_PAGE = 10;
@@ -85,15 +86,15 @@ function TenderCard({ tender, index, prediction, showPrediction }: { tender: Ten
       rel="noopener noreferrer"
       className="block"
     >
-      <Card className="group cursor-pointer border-zinc-200/60 bg-white transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/50">
+      <Card className="group cursor-pointer border-zinc-200/60 bg-white transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:shadow-zinc-900/50">
         <CardContent className="p-4 sm:p-5">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-[11px] font-bold tabular-nums text-zinc-400 transition-all group-hover:bg-zinc-900 group-hover:text-white group-hover:shadow-sm">
+            <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-[11px] font-bold tabular-nums text-zinc-400 transition-all group-hover:bg-zinc-900 group-hover:text-white group-hover:shadow-sm dark:bg-zinc-800 dark:text-zinc-500">
               {index}
             </span>
             <div className="min-w-0 flex-1">
               <div className="mb-2.5 flex items-start justify-between gap-2">
-                <h3 className="text-[13px] font-semibold leading-snug text-zinc-900 transition-colors group-hover:text-blue-700">
+                <h3 className="text-[13px] font-semibold leading-snug text-zinc-900 transition-colors group-hover:text-blue-700 dark:text-zinc-100">
                   {tender.title}
                 </h3>
                 <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-200 transition-colors group-hover:text-blue-500" />
@@ -106,7 +107,7 @@ function TenderCard({ tender, index, prediction, showPrediction }: { tender: Ten
                   </span>
                 )}
                 {tender.price > 0 && (
-                  <span className="flex items-center gap-1 rounded-md bg-zinc-50 px-1.5 py-0.5 text-xs font-semibold text-zinc-700">
+                  <span className="flex items-center gap-1 rounded-md bg-zinc-50 px-1.5 py-0.5 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
                     <Banknote className="h-3 w-3 text-zinc-400" />
                     {formatPrice(tender.price)}
                   </span>
@@ -270,7 +271,7 @@ function DashboardPage() {
       const title = (t.title || "").replace(/;/g, ",").replace(/\n/g, " ");
       const customer = (t.customer || "").replace(/;/g, ",").replace(/\n/g, " ");
       const price = t.price ? t.price.toLocaleString("ru-RU") : "—";
-      const platform = t.platform === "suppliers_portal" ? "Портал поставщиков" : t.platform === "ЕИС" ? "ЕИС" : t.platform;
+      const platform = t.platform.includes("suppliers_portal") ? "Портал поставщиков" : t.platform === "ЕИС" ? "ЕИС" : t.platform;
       const deadline = t.deadline || "—";
       const url = t.url || "";
       return `${title};${customer};${price};${platform};${deadline};${url}`;
@@ -392,15 +393,15 @@ function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/70">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-2.5">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-950 shadow-sm">
               <Search className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="text-base font-bold tracking-tight text-zinc-900">{SITE_NAME}</span>
+            <span className="text-base font-bold tracking-tight text-zinc-900 dark:text-white">{SITE_NAME}</span>
           </Link>
           <div className="flex items-center gap-2.5">
             {searched && (
@@ -421,11 +422,12 @@ function DashboardPage() {
             >
               {isAdmin(userEmail) ? "∞" : `${searchesLeft}/${getLimit(userEmail)}`}
             </Link>
+            <ThemeToggle />
             {user ? (
               <div className="flex items-center gap-1.5">
                 <Link
                   href="/saved"
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                   title="Сохранённые поиски"
                 >
                   <Bookmark className="h-3.5 w-3.5" />
@@ -541,10 +543,10 @@ function DashboardPage() {
 
       <main className="mx-auto max-w-3xl px-4 py-6">
         {/* Search Form */}
-        <div className="mb-6 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-6 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-5">
           <form onSubmit={handleSearch}>
             {/* Chips + Input in one row */}
-            <div className="mb-3 flex flex-wrap items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50/50 px-2.5 py-2 focus-within:border-zinc-400 focus-within:ring-1 focus-within:ring-zinc-400/20">
+            <div className="mb-3 flex flex-wrap items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50/50 px-2.5 py-2 focus-within:border-zinc-400 focus-within:ring-1 focus-within:ring-zinc-400/20 dark:border-zinc-700 dark:bg-zinc-800/50">
               {keywords.map((kw) => (
                 <Badge
                   key={kw}
@@ -568,7 +570,7 @@ function DashboardPage() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="min-w-[120px] flex-1 bg-transparent py-0.5 text-sm outline-none placeholder:text-zinc-400"
+                className="min-w-[120px] flex-1 bg-transparent py-0.5 text-sm outline-none placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500"
               />
             </div>
 
@@ -590,18 +592,30 @@ function DashboardPage() {
                     <span className="text-zinc-500">{p === "portal" ? "Портал" : "ЕИС"}</span>
                   </label>
                 ))}
-                {regions.length > 0 && (
-                  <select
+                <div className="relative">
+                  <input
+                    type="text"
                     value={region}
                     onChange={(e) => setRegion(e.target.value)}
-                    className="h-7 rounded-md border border-zinc-200 bg-white px-1.5 text-xs text-zinc-600 outline-none focus:border-zinc-400"
-                  >
-                    <option value="">Все регионы</option>
+                    placeholder="Регион"
+                    list="region-list"
+                    className="h-7 w-28 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-600 outline-none focus:border-zinc-400 focus:ring-1 focus:ring-zinc-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 sm:w-40"
+                  />
+                  <datalist id="region-list">
                     {regions.map((r) => (
-                      <option key={r} value={r}>{r}</option>
+                      <option key={r} value={r} />
                     ))}
-                  </select>
-                )}
+                  </datalist>
+                  {region && (
+                    <button
+                      type="button"
+                      onClick={() => setRegion("")}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-0.5 text-zinc-300 hover:text-zinc-500"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
               </div>
               <Button
                 type="submit"
@@ -621,14 +635,14 @@ function DashboardPage() {
 
           {/* Examples */}
           {!searched && (
-            <div className="mt-4 border-t border-zinc-100 pt-4">
+            <div className="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">
               <p className="mb-2.5 text-xs font-medium text-zinc-400">Попробуйте готовые запросы:</p>
               <div className="flex flex-wrap gap-1.5">
                 {EXAMPLE_KEYWORDS.map((ex) => (
                   <button
                     key={ex.join(",")}
                     onClick={() => useExample(ex)}
-                    className="flex items-center gap-1 rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-500 transition-all hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-800"
+                    className="flex items-center gap-1 rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-500 transition-all hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-800 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-white"
                   >
                     <Sparkles className="h-3 w-3 text-zinc-300" />
                     {ex.join(", ")}
@@ -646,7 +660,7 @@ function DashboardPage() {
             <div className="mb-3 space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-zinc-400">
-                  <span className="font-semibold text-zinc-700">{total}</span> тендеров
+                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">{total}</span> тендеров
                   <span className="ml-1.5 inline-flex items-center gap-1 text-zinc-300">
                     <Zap className="h-3 w-3" />
                     {searchTime < 1000
@@ -658,7 +672,7 @@ function DashboardPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={exportCSV}
-                    className="flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 transition-all hover:bg-zinc-200 hover:text-zinc-700"
+                    className="flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 transition-all hover:bg-zinc-200 hover:text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white"
                   >
                     <Download className="h-3 w-3" /> CSV
                   </button>
@@ -700,7 +714,7 @@ function DashboardPage() {
                     className={`rounded-md px-2 py-0.5 text-xs transition-colors ${
                       sort === value
                         ? "bg-zinc-900 text-white"
-                        : "text-zinc-500 hover:bg-zinc-100"
+                        : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                     }`}
                   >
                     {label}
@@ -733,7 +747,7 @@ function DashboardPage() {
                     <Search className="h-5 w-5 text-zinc-400" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-medium text-zinc-700">
+                    <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                       {elapsed < 5 ? "Подключаемся к площадкам..." : elapsed < 20 ? "Ищем по площадкам..." : elapsed < 40 ? "Парсим результаты..." : "Почти готово..."}
                     </p>
                     <p className="mt-1 tabular-nums text-xs text-zinc-400">{elapsed} сек</p>

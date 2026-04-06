@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const SITE_NAME = "ГосПоиск";
 
@@ -20,26 +21,27 @@ const DEMO_KEYWORDS = ["мебель", "канцтовары", "IT-оборуд�
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
       {/* Header */}
-      <header className="fixed top-0 z-50 w-full border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 w-full border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/70">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-950 shadow-sm">
               <Search className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-zinc-900">{SITE_NAME}</span>
+            <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">{SITE_NAME}</span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-4">
-            <Link href="/pricing" className="hidden text-sm text-zinc-500 transition-colors hover:text-zinc-900 sm:block">
+            <Link href="/pricing" className="hidden text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white sm:block">
               Тарифы
             </Link>
-            <Link href="/feedback" className="hidden text-sm text-zinc-500 transition-colors hover:text-zinc-900 md:block">
+            <Link href="/feedback" className="hidden text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white md:block">
               Обратная связь
             </Link>
-            <Link href="/auth" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900">
+            <Link href="/auth" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">
               Войти
             </Link>
+            <ThemeToggle />
             <Link href="/dashboard">
               <Button size="sm" className="rounded-full bg-zinc-900 px-4 text-xs shadow-sm shadow-zinc-900/20 transition-all hover:shadow-md hover:shadow-zinc-900/20 sm:px-5 sm:text-sm">
                 Начать поиск
@@ -52,23 +54,23 @@ export default function Home() {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-blue-100/40 blur-3xl" />
-          <div className="absolute -left-40 top-20 h-[400px] w-[400px] rounded-full bg-violet-100/30 blur-3xl" />
+          <div className="absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-blue-100/40 blur-3xl dark:bg-blue-900/20" />
+          <div className="absolute -left-40 top-20 h-[400px] w-[400px] rounded-full bg-violet-100/30 blur-3xl dark:bg-violet-900/15" />
         </div>
         <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-28 text-center sm:px-6 sm:pb-24 sm:pt-36">
           <div className="mx-auto max-w-2xl">
-            <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
+            <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
               <Sparkles className="h-3 w-3 text-amber-500" />
               Портал поставщиков + ЕИС — уже работает
             </div>
-            <h1 className="mb-5 text-3xl font-extrabold leading-[1.1] tracking-tight text-zinc-900 sm:mb-6 sm:text-5xl md:text-6xl">
+            <h1 className="mb-5 text-3xl font-extrabold leading-[1.1] tracking-tight text-zinc-900 dark:text-white sm:mb-6 sm:text-5xl md:text-6xl">
               Все тендеры по вашему
               <br />
               <span className="bg-gradient-to-r from-blue-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">
                 запросу за секунды
               </span>
             </h1>
-            <p className="mx-auto mb-6 max-w-md text-sm leading-relaxed text-zinc-500 sm:mb-8 sm:text-[1.1rem]">
+            <p className="mx-auto mb-6 max-w-md text-sm leading-relaxed text-zinc-500 dark:text-zinc-400 sm:mb-8 sm:text-[1.1rem]">
               Введите ключевые слова — получите актуальные закупки
               со всех площадок в одном окне.
             </p>
@@ -84,7 +86,7 @@ export default function Home() {
               {DEMO_KEYWORDS.map((kw) => (
                 <span
                   key={kw}
-                  className="rounded-full border border-zinc-200/80 bg-white/80 px-3 py-1 text-xs text-zinc-400 shadow-sm backdrop-blur-sm"
+                  className="rounded-full border border-zinc-200/80 bg-white/80 px-3 py-1 text-xs text-zinc-400 shadow-sm backdrop-blur-sm dark:border-zinc-700/80 dark:bg-zinc-900/80 dark:text-zinc-500"
                 >
                   {kw}
                 </span>
@@ -95,7 +97,7 @@ export default function Home() {
       </section>
 
       {/* Площадки — social proof */}
-      <section className="border-b border-zinc-100 bg-white py-8">
+      <section className="border-b border-zinc-100 bg-white py-8 dark:border-zinc-800 dark:bg-zinc-950">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <p className="mb-5 text-center text-xs font-medium uppercase tracking-widest text-zinc-300">
             Ищем на официальных площадках
@@ -114,12 +116,12 @@ export default function Home() {
       </section>
 
       {/* Как это работает — 3 шага */}
-      <section className="border-y border-zinc-100 bg-zinc-50/50 py-14 sm:py-24">
+      <section className="border-y border-zinc-100 bg-zinc-50/50 py-14 dark:border-zinc-800 dark:bg-zinc-900/50 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <p className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
             Как это работает
           </p>
-          <h2 className="mb-8 text-center text-xl font-bold text-zinc-900 sm:mb-14 sm:text-3xl">
+          <h2 className="mb-8 text-center text-xl font-bold text-zinc-900 dark:text-white sm:mb-14 sm:text-3xl">
             Три шага до нужного тендера
           </h2>
           <div className="grid gap-6 sm:grid-cols-3">
@@ -201,12 +203,12 @@ export default function Home() {
                 desc: "Повторный поиск по тем же словам — результат за миллисекунды.",
               },
             ].map((item) => (
-              <div key={item.title} className={`rounded-2xl border border-zinc-100 p-6 transition-all ${item.border} hover:shadow-md`}>
+              <div key={item.title} className={`rounded-2xl border border-zinc-100 p-6 transition-all dark:border-zinc-800 ${item.border} hover:shadow-md`}>
                 <div className={`mb-3.5 flex h-10 w-10 items-center justify-center rounded-xl ${item.bg}`}>
                   {item.icon}
                 </div>
-                <h3 className="mb-1.5 font-semibold text-zinc-900">{item.title}</h3>
-                <p className="text-sm leading-relaxed text-zinc-500">{item.desc}</p>
+                <h3 className="mb-1.5 font-semibold text-zinc-900 dark:text-white">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -214,12 +216,12 @@ export default function Home() {
       </section>
 
       {/* Популярные категории */}
-      <section className="border-t border-zinc-100 bg-zinc-50/50 py-14 sm:py-20">
+      <section className="border-t border-zinc-100 bg-zinc-50/50 py-14 dark:border-zinc-800 dark:bg-zinc-900/50 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <p className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
             Категории
           </p>
-          <h2 className="mb-8 text-center text-xl font-bold text-zinc-900 sm:text-3xl">
+          <h2 className="mb-8 text-center text-xl font-bold text-zinc-900 dark:text-white sm:text-3xl">
             Популярные направления поиска
           </h2>
           <div className="flex flex-wrap justify-center gap-2.5">
@@ -227,7 +229,7 @@ export default function Home() {
               <Link
                 key={cat.slug}
                 href={`/tenders/${cat.slug}`}
-                className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-600 transition-all hover:border-zinc-300 hover:shadow-sm hover:text-zinc-900"
+                className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-600 transition-all hover:border-zinc-300 hover:shadow-sm hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-white"
               >
                 {cat.title}
               </Link>
