@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!isSupabaseConfigured) return { error: "Supabase не настроен" };
     const supabase = createClient()!;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset`,
+      redirectTo: "https://apigospoisk.ru/auth/reset",
     });
     return { error: error?.message ?? null };
   };

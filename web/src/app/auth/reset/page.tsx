@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Search, Loader2, Lock as LockIcon, ArrowRight, CheckCircle } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Search, Loader2, Lock as LockIcon, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { Footer } from "@/components/footer";
@@ -11,13 +11,46 @@ import { Footer } from "@/components/footer";
 const SITE_NAME = "ГосПоиск";
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
+  );
+}
+
+function ResetPasswordContent() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
-  const { updatePassword, user } = useAuth();
+  const [ready, setReady] = useState(false);
+  const [expired, setExpired] = useState(false);
+  const { updatePassword, user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Проверка ошибок в URL (otp_expired и т.д.)
+    const urlError = searchParams.get("error_description") || "";
+    if (urlError || window.location.hash.includes("error")) {
+      setExpired(true);
+      return;
+    }
+    // Ждём пока Supabase обработает hash-токены и установит сессию
+    if (!authLoading && user) {
+      setReady(true);
+    }
+    // Если через 5 сек сессии нет — ссылка невалидна
+    const timeout = setTimeout(() => {
+      if (!user) setExpired(true);
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, [authLoading, user, searchParams]);
 
   useEffect(() => {
     if (done) {
@@ -68,11 +101,30 @@ export default function ResetPasswordPage() {
         </Link>
 
         <div className="rounded-2xl border border-zinc-200/60 bg-white p-7 shadow-xl shadow-zinc-100/50">
-          {done ? (
+          {expired ? (
+            <div className="flex flex-col items-center gap-3 py-4">
+              <AlertCircle className="h-10 w-10 text-red-400" />
+              <h1 className="text-lg font-bold text-zinc-900">Ссылка устарела</h1>
+              <p className="text-center text-sm text-zinc-400">
+                Ссылка для сброса пароля истекла или недействительна.
+              </p>
+              <Link
+                href="/auth"
+                className="mt-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+              >
+                Запросить новую ссылку
+              </Link>
+            </div>
+          ) : done ? (
             <div className="flex flex-col items-center gap-3 py-4">
               <CheckCircle className="h-10 w-10 text-emerald-500" />
               <h1 className="text-lg font-bold text-zinc-900">Пароль изменён</h1>
               <p className="text-sm text-zinc-400">Перенаправляем в дашборд...</p>
+            </div>
+          ) : !ready ? (
+            <div className="flex flex-col items-center gap-3 py-6">
+              <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+              <p className="text-sm text-zinc-400">Проверяем ссылку...</p>
             </div>
           ) : (
             <>

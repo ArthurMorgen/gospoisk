@@ -421,20 +421,49 @@ function DashboardPage() {
       {showPaywall && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md" onClick={() => setShowPaywall(false)}>
           <div className="mx-4 w-full max-w-sm rounded-2xl border border-zinc-200/50 bg-white p-7 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-100 to-zinc-200">
-              <Lock className="h-6 w-6 text-zinc-500" />
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100">
+              <Lock className="h-6 w-6 text-amber-600" />
             </div>
             <h3 className="mb-2 text-center text-lg font-bold text-zinc-900">
-              Лимит исчерпан
+              {userEmail ? "Дневной лимит исчерпан" : "Бесплатные поиски закончились"}
             </h3>
-            <p className="mb-6 text-center text-sm leading-relaxed text-zinc-500">
-              Вы использовали {FREE_SEARCH_LIMIT} бесплатных поиска на сегодня.
-              Оформите подписку для безлимитного доступа.
+            <p className="mb-4 text-center text-sm leading-relaxed text-zinc-500">
+              {userEmail
+                ? `Вы использовали все ${getLimit(userEmail)} поисков на сегодня. Оформите подписку для безлимитного доступа.`
+                : `Вы использовали ${FREE_SEARCH_LIMIT} бесплатных поисков. Зарегистрируйтесь — получите ${getLimit("user@")} поисков в день бесплатно.`}
             </p>
+            {!userEmail && (
+              <div className="mb-4 rounded-xl bg-emerald-50 px-4 py-3">
+                <p className="text-center text-xs font-medium text-emerald-700">
+                  Регистрация бесплатна — {getLimit("user@")} поисков/день вместо {FREE_SEARCH_LIMIT}
+                </p>
+              </div>
+            )}
+            <div className="mb-3 rounded-xl bg-zinc-50 p-3">
+              <p className="mb-2 text-xs font-semibold text-zinc-700">С подпиской Про вы получите:</p>
+              <ul className="space-y-1">
+                {["Безлимитные поиски", "AI-прогноз снижения цены", "Telegram-уведомления"].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-xs text-zinc-500">
+                    <span className="h-1 w-1 rounded-full bg-blue-500" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
             <div className="flex flex-col gap-2.5">
-              <Link href="/pricing">
-                <Button className="w-full rounded-xl bg-zinc-900 shadow-sm shadow-zinc-900/20 transition-all hover:shadow-md">Смотреть тарифы</Button>
-              </Link>
+              {!userEmail ? (
+                <Link href="/auth">
+                  <Button className="w-full rounded-xl bg-zinc-900 shadow-sm shadow-zinc-900/20 transition-all hover:shadow-md">
+                    Зарегистрироваться бесплатно
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/pricing">
+                  <Button className="w-full rounded-xl bg-zinc-900 shadow-sm shadow-zinc-900/20 transition-all hover:shadow-md">
+                    Смотреть тарифы
+                  </Button>
+                </Link>
+              )}
               <Button
                 variant="ghost"
                 className="w-full rounded-xl text-zinc-400 hover:text-zinc-600"

@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Search, Check, ArrowLeft, Sparkles, Crown, Building } from "lucide-react";
+import { Search, Check, ArrowLeft, Sparkles, Crown, Building, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/footer";
+
+export const metadata: Metadata = {
+  title: "Тарифы и цены | Подписка на поиск тендеров",
+  description: "Сравните тарифы: бесплатный — 10 поисков в день, Про — безлимитный поиск с AI-прогнозами и уведомлениями, Бизнес — API доступ и командные аккаунты. Выберите свой план.",
+};
 
 const SITE_NAME = "ГосПоиск";
 
@@ -15,7 +21,7 @@ const plans = [
     icon: <Search className="h-4 w-4" />,
     iconBg: "bg-zinc-100 text-zinc-500",
     features: [
-      "3 поиска в день",
+      "10 поисков в день",
       "Все площадки",
       "Базовая сортировка",
       "Фильтр по цене",
@@ -35,10 +41,10 @@ const plans = [
     features: [
       "Безлимитные поиски",
       "Все площадки (Портал + ЕИС + ...)",
+      "AI-прогноз снижения цены",
       "5 сохранённых поисков",
       "Telegram-уведомления о новых тендерах",
-      "Расширенные фильтры",
-      "Приоритетный парсинг",
+      "Расширенные фильтры и сортировка",
     ],
     cta: "Скоро",
     disabled: true,
@@ -155,8 +161,41 @@ export default function PricingPage() {
         <div className="mt-14 rounded-2xl border border-zinc-100 bg-zinc-50/50 px-6 py-5 text-center">
           <p className="text-sm text-zinc-500">
             Платные тарифы появятся в ближайшее время.
-            <span className="font-medium text-zinc-700"> Сейчас все площадки доступны бесплатно</span> с лимитом 3 поиска в день.
+            <span className="font-medium text-zinc-700"> Сейчас все площадки доступны бесплатно</span> с лимитом 10 поисков в день.
           </p>
+        </div>
+
+        {/* FAQ */}
+        <div className="mt-16">
+          <div className="mb-8 flex items-center justify-center gap-2">
+            <HelpCircle className="h-5 w-5 text-zinc-400" />
+            <h2 className="text-xl font-bold text-zinc-900">Частые вопросы</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              {
+                q: "Можно ли сменить тариф?",
+                a: "Да, вы можете перейти на другой тариф в любой момент. Разница будет пересчитана автоматически.",
+              },
+              {
+                q: "Что будет после окончания подписки?",
+                a: "Вы автоматически перейдёте на бесплатный тариф с лимитом 10 поисков в день. Все сохранённые поиски останутся.",
+              },
+              {
+                q: "Есть ли рассрочка?",
+                a: "Пока нет, но мы планируем добавить годовую подписку со скидкой 20% — это экономит до 2 месяцев.",
+              },
+              {
+                q: "Что такое AI-прогноз снижения цены?",
+                a: "Нейросеть анализирует категорию, начальную цену и тип процедуры, чтобы предсказать на сколько % снизится цена на торгах. Это помогает вам делать более точные ставки.",
+              },
+            ].map((item) => (
+              <div key={item.q} className="rounded-xl border border-zinc-100 bg-white p-5">
+                <h3 className="mb-2 text-sm font-semibold text-zinc-900">{item.q}</h3>
+                <p className="text-xs leading-relaxed text-zinc-500">{item.a}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </main>
 
