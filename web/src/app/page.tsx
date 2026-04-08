@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthNav } from "@/components/auth-nav";
 
 const SITE_NAME = "ГосПоиск";
 
@@ -38,9 +39,7 @@ export default function Home() {
             <Link href="/feedback" className="hidden text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white md:block">
               Обратная связь
             </Link>
-            <Link href="/auth" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">
-              Войти
-            </Link>
+            <AuthNav />
             <ThemeToggle />
             <Link href="/dashboard">
               <Button size="sm" className="rounded-full bg-zinc-900 px-4 text-xs shadow-sm shadow-zinc-900/20 transition-all hover:shadow-md hover:shadow-zinc-900/20 sm:px-5 sm:text-sm">
@@ -148,14 +147,14 @@ export default function Home() {
                 desc: "Список тендеров с ценами, заказчиками, сроками и прямыми ссылками.",
               },
             ].map((item) => (
-              <div key={item.step} className="group relative rounded-2xl border border-zinc-200/60 bg-white p-7 transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/50">
+              <div key={item.step} className="group relative rounded-2xl border border-zinc-200/60 bg-white p-7 transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:shadow-zinc-900/50">
                 <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${item.color} text-white shadow-sm`}>
                   {item.icon}
                 </div>
-                <span className="absolute right-6 top-6 text-5xl font-black text-zinc-100/70 transition-colors group-hover:text-zinc-200">
+                <span className="absolute right-6 top-6 text-5xl font-black text-zinc-100/70 transition-colors group-hover:text-zinc-200 dark:text-zinc-800/50">
                   {item.step}
                 </span>
-                <h3 className="mb-2 text-base font-semibold text-zinc-900">{item.title}</h3>
+                <h3 className="mb-2 text-base font-semibold text-zinc-900 dark:text-white">{item.title}</h3>
                 <p className="text-sm leading-relaxed text-zinc-500">{item.desc}</p>
               </div>
             ))}
@@ -169,8 +168,8 @@ export default function Home() {
           <p className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
             Преимущества
           </p>
-          <h2 className="mb-8 text-center text-xl font-bold text-zinc-900 sm:mb-14 sm:text-3xl">
-            Экономьте время, зарабатывайте больше
+          <h2 className="mb-8 text-center text-xl font-bold text-zinc-900 dark:text-white sm:mb-14 sm:text-3xl">
+            Тратьте меньше времени, зарабатывайте больше
           </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[

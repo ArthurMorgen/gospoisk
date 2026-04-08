@@ -63,6 +63,7 @@ class Tender(BaseModel):
     status: str = ""
     url: str = ""
     tender_type: str = ""
+    region: str = ""
     parsed_at: str = ""
 
 
@@ -78,6 +79,7 @@ def normalize_tender(t: dict) -> dict:
         'status': str(t.get('status') or ''),
         'url': str(t.get('url') or ''),
         'tender_type': str(t.get('tender_type') or ''),
+        'region': str(t.get('region') or ''),
         'parsed_at': str(t.get('parsed_at') or ''),
     }
 
@@ -306,12 +308,13 @@ async def search_tenders(
         fl = filter.lower()
         all_tenders = [t for t in all_tenders if fl in t.get('title', '').lower()]
 
-    # Фильтр по региону
+    # Фильтр по региону — сначала по полю region, потом по customer/title
     if body.region:
         region_lower = body.region.lower()
         all_tenders = [
             t for t in all_tenders
-            if region_lower in (t.get('customer') or '').lower()
+            if region_lower in (t.get('region') or '').lower()
+            or region_lower in (t.get('customer') or '').lower()
             or region_lower in (t.get('title') or '').lower()
         ]
 

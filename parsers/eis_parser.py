@@ -360,6 +360,19 @@ class EISParser(BaseParser):
             status_elem = row.find('div', class_='registry-entry__header-mid__title')
             status = status_elem.get('title', '') if status_elem else ''
             
+            # Извлекаем регион из блока заказчика или адреса
+            region = ''
+            place_elem = row.find('div', class_='registry-entry__body-href')
+            if place_elem:
+                place_text = place_elem.get_text(separator=' ', strip=True)
+                # Ищем типичные маркеры региона: "г. Москва", "Московская обл." и т.д.
+                import re as _re
+                region_match = _re.search(
+                    r'(?:г\.\s*|город\s+)([\w\-]+)', place_text
+                )
+                if region_match:
+                    region = region_match.group(1)
+            
             return {
                 'tender_id': tender_id,
                 'title': title,
@@ -369,6 +382,7 @@ class EISParser(BaseParser):
                 'customer': customer,
                 'deadline': deadline,
                 'status': status,
+                'region': region,
                 'description': title  # Для ЕИС описание часто совпадает с заголовком
             }
         

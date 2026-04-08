@@ -10,6 +10,7 @@ export interface Tender {
   status: string;
   url: string;
   tender_type: string;
+  region: string;
   parsed_at: string;
 }
 

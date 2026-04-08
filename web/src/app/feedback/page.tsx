@@ -28,14 +28,14 @@ export default function FeedbackPage() {
   ] as const;
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50">
-      <header className="border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
+      <header className="border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/70">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-2.5">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-950 shadow-sm">
               <Search className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="text-base font-bold tracking-tight text-zinc-900">{SITE_NAME}</span>
+            <span className="text-base font-bold tracking-tight text-zinc-900 dark:text-white">{SITE_NAME}</span>
           </Link>
           <Link href="/dashboard">
             <Button variant="outline" size="sm" className="rounded-full text-xs">
@@ -47,27 +47,27 @@ export default function FeedbackPage() {
 
       <main className="mx-auto w-full max-w-lg flex-1 px-4 py-12">
         {sent ? (
-          <div className="rounded-2xl border border-zinc-200/60 bg-white px-6 py-16 text-center">
+          <div className="rounded-2xl border border-zinc-200/60 bg-white px-6 py-16 text-center dark:border-zinc-800 dark:bg-zinc-900">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50">
               <CheckCircle2 className="h-7 w-7 text-emerald-500" />
             </div>
-            <h2 className="mb-2 text-lg font-bold text-zinc-900">Спасибо за обращение!</h2>
+            <h2 className="mb-2 text-lg font-bold text-zinc-900 dark:text-white">Спасибо за обращение!</h2>
             <p className="mb-6 text-sm text-zinc-400">
               Мы получили ваше сообщение и ответим в ближайшее время.
             </p>
-            <Link href="/dashboard">
+            <Link href="/">
               <Button variant="outline" className="rounded-full">
-                Вернуться к поиску
+                На главную
               </Button>
             </Link>
           </div>
         ) : (
           <>
             <div className="mb-8 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
                 <MessageSquare className="h-5 w-5 text-zinc-500" />
               </div>
-              <h1 className="text-xl font-bold text-zinc-900">Обратная связь</h1>
+              <h1 className="text-xl font-bold text-zinc-900 dark:text-white">Обратная связь</h1>
               <p className="mt-1.5 text-sm text-zinc-400">
                 Нашли ошибку? Есть идея? Напишите нам
               </p>
@@ -83,7 +83,7 @@ export default function FeedbackPage() {
                     className={`flex-1 rounded-xl border px-3 py-2.5 text-xs font-medium transition-all ${
                       type === t.value
                         ? "border-zinc-900 bg-zinc-900 text-white shadow-sm"
-                        : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300"
+                        : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
                     }`}
                   >
                     {t.label}
@@ -96,8 +96,8 @@ export default function FeedbackPage() {
                   type="text"
                   placeholder="Ваше имя"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none focus:ring-0"
+                  onChange={(e) => setName(e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁ\s\-]/g, ''))}
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none focus:ring-0 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-600"
                 />
               </div>
 
@@ -107,7 +107,7 @@ export default function FeedbackPage() {
                   placeholder="Email для ответа"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none focus:ring-0"
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none focus:ring-0 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-600"
                 />
               </div>
 
@@ -118,7 +118,7 @@ export default function FeedbackPage() {
                   onChange={(e) => setMessage(e.target.value)}
                   rows={5}
                   required
-                  className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none focus:ring-0"
+                  className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none focus:ring-0 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-600"
                 />
               </div>
 

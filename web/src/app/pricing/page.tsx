@@ -74,14 +74,14 @@ const plans = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-50 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
+      <header className="sticky top-0 z-50 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/70">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-950 shadow-sm">
               <Search className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-zinc-900">{SITE_NAME}</span>
+            <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">{SITE_NAME}</span>
           </Link>
           <Link href="/dashboard">
             <Button variant="outline" size="sm" className="gap-1.5 rounded-full">
@@ -97,7 +97,7 @@ export default function PricingPage() {
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
             Тарифы
           </p>
-          <h1 className="mb-3 text-2xl font-bold text-zinc-900 sm:mb-4 sm:text-4xl">
+          <h1 className="mb-3 text-2xl font-bold text-zinc-900 dark:text-white sm:mb-4 sm:text-4xl">
             Простые и прозрачные цены
           </h1>
           <p className="mx-auto max-w-md text-zinc-500">
@@ -111,8 +111,8 @@ export default function PricingPage() {
               key={plan.name}
               className={`relative rounded-2xl border p-7 transition-all ${
                 plan.highlight
-                  ? "border-zinc-900/20 bg-white shadow-xl shadow-zinc-200/50 sm:scale-105"
-                  : "border-zinc-200/80 bg-white hover:border-zinc-300 hover:shadow-md"
+                  ? "border-zinc-900/20 bg-white shadow-xl shadow-zinc-200/50 dark:border-zinc-700 dark:bg-zinc-900 dark:shadow-zinc-900/50 sm:scale-105"
+                  : "border-zinc-200/80 bg-white hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
               }`}
             >
               {plan.highlight && (
@@ -125,18 +125,18 @@ export default function PricingPage() {
               <div className={`mb-4 flex h-9 w-9 items-center justify-center rounded-xl ${plan.iconBg}`}>
                 {plan.icon}
               </div>
-              <h3 className="mb-0.5 text-lg font-bold text-zinc-900">{plan.name}</h3>
+              <h3 className="mb-0.5 text-lg font-bold text-zinc-900 dark:text-white">{plan.name}</h3>
               <p className="mb-5 text-xs text-zinc-400">{plan.description}</p>
               <div className="mb-6 flex items-baseline gap-0.5">
-                <span className="text-4xl font-extrabold tracking-tight text-zinc-900">{plan.price}</span>
+                <span className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">{plan.price}</span>
                 <span className="text-lg font-semibold text-zinc-400">{plan.currency}</span>
                 {plan.period && <span className="ml-0.5 text-sm text-zinc-400">{plan.period}</span>}
               </div>
-              <div className="mb-6 h-px bg-zinc-100" />
+              <div className="mb-6 h-px bg-zinc-100 dark:bg-zinc-800" />
               <ul className="mb-7 space-y-2.5">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm text-zinc-600">
-                    <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-50">
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-zinc-600 dark:text-zinc-400">
+                    <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/50">
                       <Check className="h-2.5 w-2.5 text-emerald-600" />
                     </div>
                     {f}
@@ -158,10 +158,10 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <div className="mt-14 rounded-2xl border border-zinc-100 bg-zinc-50/50 px-6 py-5 text-center">
+        <div className="mt-14 rounded-2xl border border-zinc-100 bg-zinc-50/50 px-6 py-5 text-center dark:border-zinc-800 dark:bg-zinc-900/50">
           <p className="text-sm text-zinc-500">
             Платные тарифы появятся в ближайшее время.
-            <span className="font-medium text-zinc-700"> Сейчас все площадки доступны бесплатно</span> с лимитом 10 поисков в день.
+            <span className="font-medium text-zinc-700 dark:text-zinc-300"> Сейчас все площадки доступны бесплатно</span> с лимитом 10 поисков в день.
           </p>
         </div>
 
@@ -169,7 +169,7 @@ export default function PricingPage() {
         <div className="mt-16">
           <div className="mb-8 flex items-center justify-center gap-2">
             <HelpCircle className="h-5 w-5 text-zinc-400" />
-            <h2 className="text-xl font-bold text-zinc-900">Частые вопросы</h2>
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Частые вопросы</h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {[
@@ -190,9 +190,9 @@ export default function PricingPage() {
                 a: "Нейросеть анализирует категорию, начальную цену и тип процедуры, чтобы предсказать на сколько % снизится цена на торгах. Это помогает вам делать более точные ставки.",
               },
             ].map((item) => (
-              <div key={item.q} className="rounded-xl border border-zinc-100 bg-white p-5">
-                <h3 className="mb-2 text-sm font-semibold text-zinc-900">{item.q}</h3>
-                <p className="text-xs leading-relaxed text-zinc-500">{item.a}</p>
+              <div key={item.q} className="rounded-xl border border-zinc-100 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+                <h3 className="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">{item.q}</h3>
+                <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">{item.a}</p>
               </div>
             ))}
           </div>

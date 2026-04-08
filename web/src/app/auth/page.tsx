@@ -14,6 +14,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -35,6 +36,10 @@ export default function AuthPage() {
     }
     if (mode !== "forgot" && password.length < 6) {
       setError("Пароль должен быть не менее 6 символов");
+      return;
+    }
+    if (mode === "register" && password !== confirmPassword) {
+      setError("Пароли не совпадают");
       return;
     }
 
@@ -71,10 +76,10 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 dark:bg-zinc-950">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -right-60 -top-60 h-[500px] w-[500px] rounded-full bg-blue-50/60 blur-3xl" />
-        <div className="absolute -left-60 bottom-0 h-[400px] w-[400px] rounded-full bg-violet-50/40 blur-3xl" />
+        <div className="absolute -right-60 -top-60 h-[500px] w-[500px] rounded-full bg-blue-50/60 blur-3xl dark:bg-blue-900/20" />
+        <div className="absolute -left-60 bottom-0 h-[400px] w-[400px] rounded-full bg-violet-50/40 blur-3xl dark:bg-violet-900/15" />
       </div>
 
       <div className="relative w-full max-w-sm">
@@ -82,11 +87,11 @@ export default function AuthPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-950 shadow-sm">
             <Search className="h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-zinc-900">{SITE_NAME}</span>
+          <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">{SITE_NAME}</span>
         </Link>
 
-        <div className="rounded-2xl border border-zinc-200/60 bg-white p-7 shadow-xl shadow-zinc-100/50">
-          <h1 className="mb-1 text-center text-lg font-bold text-zinc-900">
+        <div className="rounded-2xl border border-zinc-200/60 bg-white p-7 shadow-xl shadow-zinc-100/50 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-zinc-900/50">
+          <h1 className="mb-1 text-center text-lg font-bold text-zinc-900 dark:text-white">
             {mode === "login" ? "Войти в аккаунт" : mode === "register" ? "Создать аккаунт" : "Восстановление пароля"}
           </h1>
           <p className="mb-6 text-center text-sm text-zinc-400">
@@ -105,7 +110,7 @@ export default function AuthPage() {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:ring-1 focus:ring-zinc-400/20"
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:ring-1 focus:ring-zinc-400/20 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-white dark:focus:bg-zinc-800"
                 autoComplete="email"
                 autoFocus
               />
@@ -118,19 +123,32 @@ export default function AuthPage() {
                   placeholder="Пароль"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:ring-1 focus:ring-zinc-400/20"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:ring-1 focus:ring-zinc-400/20 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-white dark:focus:bg-zinc-800"
                   autoComplete={mode === "login" ? "current-password" : "new-password"}
+                />
+              </div>
+            )}
+            {mode === "register" && (
+              <div className="relative">
+                <LockIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300" />
+                <input
+                  type="password"
+                  placeholder="Повторите пароль"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:ring-1 focus:ring-zinc-400/20 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-white dark:focus:bg-zinc-800"
+                  autoComplete="new-password"
                 />
               </div>
             )}
 
             {error && (
-              <div className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
+              <div className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600 dark:bg-red-950/50 dark:text-red-400">
                 {error}
               </div>
             )}
             {success && (
-              <div className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-600">
+              <div className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
                 {success}
               </div>
             )}
@@ -172,11 +190,11 @@ export default function AuthPage() {
               className="text-sm text-zinc-400 transition-colors hover:text-zinc-700"
             >
               {mode === "login" ? (
-                <>Нет аккаунта? <span className="font-medium text-zinc-700">Создать</span></>
+                <>Нет аккаунта? <span className="font-medium text-zinc-700 dark:text-zinc-200">Создать</span></>
               ) : mode === "register" ? (
-                <>Уже есть аккаунт? <span className="font-medium text-zinc-700">Войти</span></>
+                <>Уже есть аккаунт? <span className="font-medium text-zinc-700 dark:text-zinc-200">Войти</span></>
               ) : (
-                <>Вспомнили пароль? <span className="font-medium text-zinc-700">Войти</span></>
+                <>Вспомнили пароль? <span className="font-medium text-zinc-700 dark:text-zinc-200">Войти</span></>
               )}
             </button>
           </div>
@@ -186,7 +204,7 @@ export default function AuthPage() {
           Можно пользоваться без регистрации — 10 поисков в день
         </p>
         <div className="mt-3 text-center">
-          <Link href="/dashboard" className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-900">
+          <Link href="/dashboard" className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white">
             Продолжить без аккаунта →
           </Link>
         </div>

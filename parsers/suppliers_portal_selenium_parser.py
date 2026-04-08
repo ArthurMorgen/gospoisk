@@ -172,6 +172,7 @@ class SuppliersPortalSeleniumParser:
                 'status': status,
                 'url': url,
                 'tender_type': tender_type,
+                'region': 'Москва',
                 'parsed_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
         except Exception as e:

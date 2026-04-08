@@ -72,3 +72,17 @@ export async function updateLastRun(id: string): Promise<void> {
     .update({ last_run_at: new Date().toISOString() })
     .eq("id", id);
 }
+
+export async function findSavedSearchByKeywords(keywords: string[]): Promise<SavedSearch | null> {
+  if (!isSupabaseConfigured) return null;
+  const supabase = createClient()!;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data } = await supabase
+    .from("saved_searches")
+    .select("*")
+    .eq("user_id", user.id);
+  if (!data) return null;
+  const sorted = [...keywords].sort().join(",");
+  return data.find((s) => [...s.keywords].sort().join(",") === sorted) || null;
+}

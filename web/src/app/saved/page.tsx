@@ -77,14 +77,14 @@ export default function SavedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="sticky top-0 z-50 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      <header className="sticky top-0 z-50 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/70">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-2.5">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-950 shadow-sm">
               <Search className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="text-base font-bold tracking-tight text-zinc-900">{SITE_NAME}</span>
+            <span className="text-base font-bold tracking-tight text-zinc-900 dark:text-white">{SITE_NAME}</span>
           </Link>
           <Link href="/dashboard">
             <Button variant="outline" size="sm" className="gap-1.5 rounded-full text-xs">
@@ -97,11 +97,11 @@ export default function SavedPage() {
 
       <main className="mx-auto max-w-3xl px-4 py-8">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
             <Bookmark className="h-5 w-5 text-zinc-500" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-zinc-900">Сохранённые поиски</h1>
+            <h1 className="text-lg font-bold text-zinc-900 dark:text-white">Сохранённые поиски</h1>
             <p className="text-xs text-zinc-400">
               {searches.length > 0
                 ? `${searches.length} ${searches.length === 1 ? "поиск" : "поисков"}`
@@ -115,11 +115,11 @@ export default function SavedPage() {
             <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
           </div>
         ) : searches.length === 0 ? (
-          <div className="rounded-2xl border border-zinc-200/60 bg-white px-6 py-16 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100">
-              <Bookmark className="h-5 w-5 text-zinc-300" />
+          <div className="rounded-2xl border border-zinc-200/60 bg-white px-6 py-16 text-center dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+              <Bookmark className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
             </div>
-            <p className="mb-1 font-semibold text-zinc-900">Нет сохранённых поисков</p>
+            <p className="mb-1 font-semibold text-zinc-900 dark:text-white">Нет сохранённых поисков</p>
             <p className="mb-5 text-sm text-zinc-400">
               Выполните поиск на дашборде и нажмите «Сохранить»
             </p>
@@ -135,7 +135,7 @@ export default function SavedPage() {
             {searches.map((search) => (
               <Card
                 key={search.id}
-                className="group border-zinc-200/60 bg-white transition-all hover:border-zinc-300 hover:shadow-md"
+                className="group border-zinc-200/60 bg-white transition-all hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
               >
                 <CardContent className="flex items-center gap-4 p-4">
                   <div className="min-w-0 flex-1">

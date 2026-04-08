@@ -34,14 +34,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   if (!post) notFound();
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-50 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
+      <header className="sticky top-0 z-50 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/70">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-950 shadow-sm">
               <Search className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-zinc-900">ГосПоиск</span>
+            <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">ГосПоиск</span>
           </Link>
           <Link href="/blog">
             <Button variant="outline" size="sm" className="gap-1.5 rounded-full">
@@ -58,13 +58,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           {post.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500"
+              className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
             >
               {tag}
             </span>
           ))}
         </div>
-        <h1 className="mb-4 text-2xl font-bold leading-tight text-zinc-900 sm:text-3xl">{post.title}</h1>
+        <h1 className="mb-4 text-2xl font-bold leading-tight text-zinc-900 dark:text-white sm:text-3xl">{post.title}</h1>
         <div className="mb-8 flex items-center gap-3 text-xs text-zinc-400">
           <span>{new Date(post.date).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}</span>
           <span className="flex items-center gap-1">
@@ -79,19 +79,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             switch (section.type) {
               case "h2":
                 return (
-                  <h2 key={i} className="mt-8 text-lg font-bold text-zinc-900">
+                  <h2 key={i} className="mt-8 text-lg font-bold text-zinc-900 dark:text-white">
                     {section.text}
                   </h2>
                 );
               case "h3":
                 return (
-                  <h3 key={i} className="mt-5 text-base font-semibold text-zinc-800">
+                  <h3 key={i} className="mt-5 text-base font-semibold text-zinc-800 dark:text-zinc-200">
                     {section.text}
                   </h3>
                 );
               case "p":
                 return (
-                  <p key={i} className="text-sm leading-relaxed text-zinc-600">
+                  <p key={i} className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
                     {section.text}
                   </p>
                 );
@@ -99,7 +99,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 return (
                   <ul key={i} className="ml-4 list-disc space-y-1.5">
                     {section.items?.map((item, j) => (
-                      <li key={j} className="text-sm leading-relaxed text-zinc-600">
+                      <li key={j} className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
                         {item}
                       </li>
                     ))}
@@ -109,7 +109,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 return (
                   <ol key={i} className="ml-4 list-decimal space-y-1.5">
                     {section.items?.map((item, j) => (
-                      <li key={j} className="text-sm leading-relaxed text-zinc-600">
+                      <li key={j} className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
                         {item}
                       </li>
                     ))}
@@ -117,9 +117,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 );
               case "tip":
                 return (
-                  <div key={i} className="flex gap-3 rounded-xl bg-amber-50 p-4">
+                  <div key={i} className="flex gap-3 rounded-xl bg-amber-50 p-4 dark:bg-amber-950/30">
                     <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-                    <p className="text-sm leading-relaxed text-amber-800">{section.text}</p>
+                    <p className="text-sm leading-relaxed text-amber-800 dark:text-amber-300">{section.text}</p>
                   </div>
                 );
               case "cta":
@@ -142,7 +142,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </article>
 
         {/* Related posts */}
-        <div className="mt-14 border-t border-zinc-100 pt-10">
+        <div className="mt-14 border-t border-zinc-100 pt-10 dark:border-zinc-800">
           <h3 className="mb-5 text-sm font-semibold uppercase tracking-wider text-zinc-400">
             Другие статьи
           </h3>
@@ -153,9 +153,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 <Link
                   key={p.slug}
                   href={`/blog/${p.slug}`}
-                  className="group block rounded-xl border border-zinc-100 p-4 transition-all hover:border-zinc-200 hover:shadow-sm"
+                  className="group block rounded-xl border border-zinc-100 p-4 transition-all hover:border-zinc-200 hover:shadow-sm dark:border-zinc-800 dark:hover:border-zinc-700"
                 >
-                  <h4 className="text-sm font-semibold text-zinc-900 transition-colors group-hover:text-blue-600">
+                  <h4 className="text-sm font-semibold text-zinc-900 transition-colors group-hover:text-blue-600 dark:text-white">
                     {p.title}
                   </h4>
                   <p className="mt-1 text-xs text-zinc-400">{p.readTime}</p>

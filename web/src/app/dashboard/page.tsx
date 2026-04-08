@@ -24,6 +24,8 @@ import {
   Bookmark,
   BookmarkCheck,
   Download,
+  MapPin,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,11 +34,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { searchTenders, predictBatch, fetchRegions, type Tender, type SortOption, type PredictionResult } from "@/lib/api";
 import { canSearch, recordSearch, getSearchesLeft, getLimit, isAdmin, isPro, FREE_SEARCH_LIMIT } from "@/lib/usage";
 import { useAuth } from "@/lib/auth-context";
-import { saveSearch } from "@/lib/saved-searches";
+import { saveSearch, findSavedSearchByKeywords, deleteSavedSearch } from "@/lib/saved-searches";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const SITE_NAME = "ГосПоиск";
 const ITEMS_PER_PAGE = 10;
+
+function pluralize(n: number, one: string, few: string, many: string): string {
+  const abs = Math.abs(n) % 100;
+  const last = abs % 10;
+  if (abs > 10 && abs < 20) return many;
+  if (last > 1 && last < 5) return few;
+  if (last === 1) return one;
+  return many;
+}
 
 const EXAMPLE_KEYWORDS = [
   ["грамоты", "дипломы", "бланки"],
@@ -134,6 +145,12 @@ function TenderCard({ tender, index, prediction, showPrediction }: { tender: Ten
                     {tender.deadline}
                   </span>
                 )}
+                {tender.region && (
+                  <span className="flex items-center gap-1 text-xs text-zinc-400">
+                    <MapPin className="h-3 w-3 shrink-0" />
+                    {tender.region}
+                  </span>
+                )}
                 {tender.customer && (
                   <span className="flex items-center gap-1 text-xs text-zinc-400">
                     <Building2 className="h-3 w-3 shrink-0" />
@@ -198,6 +215,7 @@ function DashboardPage() {
   const [searchesLeft, setSearchesLeft] = useState(FREE_SEARCH_LIMIT);
   const userEmail = user?.email;
   const [saved, setSaved] = useState(false);
+  const [savedSearchId, setSavedSearchId] = useState<string | null>(null);
   const [predictions, setPredictions] = useState<(PredictionResult | null)[]>([]);
   const [saving, setSaving] = useState(false);
   const [region, setRegion] = useState("");
@@ -286,9 +304,9 @@ function DashboardPage() {
     URL.revokeObjectURL(url);
   };
 
-  const doSearch = async (kws: string[], pg: number = 1, sortOpt?: SortOption) => {
+  const doSearch = async (kws: string[], pg: number = 1, sortOpt?: SortOption, isNewSearch: boolean = true) => {
     if (kws.length === 0) return;
-    if (pg === 1 && !canSearch(userEmail)) {
+    if (isNewSearch && !canSearch(userEmail)) {
       setShowPaywall(true);
       return;
     }
@@ -326,12 +344,22 @@ function DashboardPage() {
       } else {
         setPredictions([]);
       }
-      if (pg === 1) {
+      if (isNewSearch) {
         recordSearch();
         setSearchesLeft(getSearchesLeft(userEmail));
+        // Проверяем, сохранён ли этот поиск
+        setSaved(false);
+        setSavedSearchId(null);
+        if (user) {
+          findSavedSearchByKeywords(kws).then((found) => {
+            if (found) { setSaved(true); setSavedSearchId(found.id); }
+          });
+        }
+      }
+      if (pg === 1) {
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
         // Промо-модалка через 15 сек (только для незалогиненных, один раз за сессию)
-        if (!userEmail && !sessionStorage.getItem("promo_shown")) {
+        if (isNewSearch && !userEmail && !sessionStorage.getItem("promo_shown")) {
           if (promoTimerRef.current) clearTimeout(promoTimerRef.current);
           promoTimerRef.current = setTimeout(() => {
             setShowPromo(true);
@@ -361,12 +389,12 @@ function DashboardPage() {
   };
 
   const handlePageChange = (newPage: number) => {
-    doSearch(activeKeywords, newPage);
+    doSearch(activeKeywords, newPage, undefined, false);
   };
 
   const handleSort = (s: SortOption) => {
     setSort(s);
-    if (activeKeywords.length > 0) doSearch(activeKeywords, 1, s);
+    if (activeKeywords.length > 0) doSearch(activeKeywords, 1, s, false);
   };
 
   const useExample = (ex: string[]) => {
@@ -381,14 +409,20 @@ function DashboardPage() {
     setError(null);
     setTotal(0);
     setSaved(false);
+    setSavedSearchId(null);
     inputRef.current?.focus();
   };
 
   const handleSave = async () => {
-    if (!user || saving || saved || activeKeywords.length === 0) return;
+    if (!user || saving || activeKeywords.length === 0) return;
     setSaving(true);
-    const result = await saveSearch(activeKeywords, platforms);
-    if (result) setSaved(true);
+    if (saved && savedSearchId) {
+      const ok = await deleteSavedSearch(savedSearchId);
+      if (ok) { setSaved(false); setSavedSearchId(null); }
+    } else {
+      const result = await saveSearch(activeKeywords, platforms);
+      if (result) { setSaved(true); setSavedSearchId(result.id); }
+    }
     setSaving(false);
   };
 
@@ -404,6 +438,14 @@ function DashboardPage() {
             <span className="text-base font-bold tracking-tight text-zinc-900 dark:text-white">{SITE_NAME}</span>
           </Link>
           <div className="flex items-center gap-2.5">
+            <Link
+              href="/"
+              className="flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+              title="На главную"
+            >
+              <Home className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Главная</span>
+            </Link>
             {searched && (
               <button
                 onClick={clearAll}
@@ -416,8 +458,8 @@ function DashboardPage() {
               href="/pricing"
               className={`rounded-full px-2.5 py-1 text-xs font-medium tabular-nums ${
                 searchesLeft === 0
-                  ? "bg-red-50 text-red-600"
-                  : "bg-zinc-100 text-zinc-500"
+                  ? "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400"
+                  : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
               }`}
             >
               {isAdmin(userEmail) ? "∞" : `${searchesLeft}/${getLimit(userEmail)}`}
@@ -434,8 +476,8 @@ function DashboardPage() {
                 </Link>
                 <span className="hidden text-xs text-zinc-400 sm:block">{user.email?.split("@")[0]}</span>
                 <button
-                  onClick={() => signOut()}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+                  onClick={() => { signOut(); window.location.href = '/'; }}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                   title="Выйти"
                 >
                   <LogOut className="h-3.5 w-3.5" />
@@ -443,7 +485,7 @@ function DashboardPage() {
               </div>
             ) : (
               <Link href="/auth">
-                <button className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-100 text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-700">
+                <button className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-100 text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-200">
                   <User className="h-3.5 w-3.5" />
                 </button>
               </Link>
@@ -455,11 +497,11 @@ function DashboardPage() {
       {/* Paywall Modal */}
       {showPaywall && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md" onClick={() => setShowPaywall(false)}>
-          <div className="mx-4 w-full max-w-sm rounded-2xl border border-zinc-200/50 bg-white p-7 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100">
+          <div className="mx-4 w-full max-w-sm rounded-2xl border border-zinc-200/50 bg-white p-7 shadow-2xl dark:border-zinc-700 dark:bg-zinc-900" onClick={(e) => e.stopPropagation()}>
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30">
               <Lock className="h-6 w-6 text-amber-600" />
             </div>
-            <h3 className="mb-2 text-center text-lg font-bold text-zinc-900">
+            <h3 className="mb-2 text-center text-lg font-bold text-zinc-900 dark:text-white">
               {userEmail ? "Дневной лимит исчерпан" : "Бесплатные поиски закончились"}
             </h3>
             <p className="mb-4 text-center text-sm leading-relaxed text-zinc-500">
@@ -474,8 +516,8 @@ function DashboardPage() {
                 </p>
               </div>
             )}
-            <div className="mb-3 rounded-xl bg-zinc-50 p-3">
-              <p className="mb-2 text-xs font-semibold text-zinc-700">С подпиской Про вы получите:</p>
+            <div className="mb-3 rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800">
+              <p className="mb-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">С подпиской Про вы получите:</p>
               <ul className="space-y-1">
                 {["Безлимитные поиски", "AI-прогноз снижения цены", "Telegram-уведомления"].map((f) => (
                   <li key={f} className="flex items-center gap-2 text-xs text-zinc-500">
@@ -515,14 +557,14 @@ function DashboardPage() {
       {showPromo && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center" onClick={() => setShowPromo(false)}>
           <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
-          <div className="relative mx-4 mb-4 w-full max-w-sm rounded-2xl border border-zinc-200/50 bg-white p-6 shadow-2xl sm:mb-0" onClick={(e) => e.stopPropagation()}>
+          <div className="relative mx-4 mb-4 w-full max-w-sm rounded-2xl border border-zinc-200/50 bg-white p-6 shadow-2xl dark:border-zinc-700 dark:bg-zinc-900 sm:mb-0" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowPromo(false)} className="absolute right-3 top-3 rounded-full p-1 text-zinc-300 hover:text-zinc-500">
               <X className="h-4 w-4" />
             </button>
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-violet-50">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-violet-50 dark:from-blue-900/30 dark:to-violet-900/30">
               <Sparkles className="h-5 w-5 text-blue-600" />
             </div>
-            <h3 className="mb-2 text-center text-base font-bold text-zinc-900">
+            <h3 className="mb-2 text-center text-base font-bold text-zinc-900 dark:text-white">
               Хотите получать больше?
             </h3>
             <p className="mb-5 text-center text-xs leading-relaxed text-zinc-500">
@@ -574,10 +616,8 @@ function DashboardPage() {
               />
             </div>
 
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <p className="hidden text-xs text-zinc-400 sm:block">Enter — добавить, повторный — искать</p>
-                <span className="hidden text-zinc-200 sm:block">|</span>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 {(["portal", "eis"] as const).map((p) => (
                   <label key={p} className="flex cursor-pointer items-center gap-1 text-xs">
                     <input
@@ -589,9 +629,12 @@ function DashboardPage() {
                       }}
                       className="h-3 w-3 rounded accent-zinc-900"
                     />
-                    <span className="text-zinc-500">{p === "portal" ? "Портал" : "ЕИС"}</span>
+                    <span className="text-zinc-500 dark:text-zinc-400">{p === "portal" ? "Портал" : "ЕИС"}</span>
                   </label>
                 ))}
+                {platforms.length === 0 && (
+                  <span className="text-xs font-medium text-red-500">Выберите хотя бы одну площадку</span>
+                )}
                 <div className="relative">
                   <input
                     type="text"
@@ -599,7 +642,7 @@ function DashboardPage() {
                     onChange={(e) => setRegion(e.target.value)}
                     placeholder="Регион"
                     list="region-list"
-                    className="h-7 w-28 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-600 outline-none focus:border-zinc-400 focus:ring-1 focus:ring-zinc-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 sm:w-40"
+                    className="h-7 w-28 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-600 outline-none focus:border-zinc-400 focus:ring-1 focus:ring-zinc-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 sm:w-36"
                   />
                   <datalist id="region-list">
                     {regions.map((r) => (
@@ -616,11 +659,13 @@ function DashboardPage() {
                     </button>
                   )}
                 </div>
+                <p className="hidden text-xs text-zinc-300 dark:text-zinc-600 sm:block">|</p>
+                <p className="hidden text-xs text-zinc-400 sm:block">Enter — добавить, повторный — искать</p>
               </div>
               <Button
                 type="submit"
-                disabled={(keywords.length === 0 && !inputValue.trim()) || loading}
-                className="ml-auto gap-1.5 rounded-lg"
+                disabled={(keywords.length === 0 && !inputValue.trim()) || loading || platforms.length === 0}
+                className="w-full shrink-0 gap-1.5 rounded-lg sm:w-auto"
                 size="sm"
               >
                 {loading ? (
@@ -660,7 +705,7 @@ function DashboardPage() {
             <div className="mb-3 space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-zinc-400">
-                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">{total}</span> тендеров
+                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">{total}</span> {pluralize(total, "тендер", "тендера", "тендеров")}
                   <span className="ml-1.5 inline-flex items-center gap-1 text-zinc-300">
                     <Zap className="h-3 w-3" />
                     {searchTime < 1000
@@ -679,17 +724,17 @@ function DashboardPage() {
                   {user && (
                     <button
                       onClick={handleSave}
-                      disabled={saving || saved}
+                      disabled={saving}
                       className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
                         saved
-                          ? "bg-emerald-50 text-emerald-600"
-                          : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700"
+                          ? "bg-emerald-50 text-emerald-600 hover:bg-red-50 hover:text-red-500 dark:bg-emerald-950/40 dark:text-emerald-400"
+                          : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400"
                       }`}
                     >
-                      {saved ? (
-                        <><BookmarkCheck className="h-3 w-3" /> Сохранено</>
-                      ) : saving ? (
+                      {saving ? (
                         <><Loader2 className="h-3 w-3 animate-spin" /> ...</>
+                      ) : saved ? (
+                        <><BookmarkCheck className="h-3 w-3" /> Сохранено</>
                       ) : (
                         <><Bookmark className="h-3 w-3" /> Сохранить</>
                       )}
@@ -726,7 +771,7 @@ function DashboardPage() {
 
           {/* Error */}
           {error && (
-            <div className="mb-4 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+            <div className="mb-4 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-800 dark:bg-red-950/50 dark:text-red-400">
               <span>{error}</span>
               <button
                 onClick={() => doSearch(activeKeywords, page)}
@@ -743,7 +788,7 @@ function DashboardPage() {
               <>
                 <div className="flex flex-col items-center gap-4 py-16">
                   <div className="relative flex h-14 w-14 items-center justify-center">
-                    <div className="absolute inset-0 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900" />
+                    <div className="absolute inset-0 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-300" />
                     <Search className="h-5 w-5 text-zinc-400" />
                   </div>
                   <div className="text-center">
@@ -754,7 +799,7 @@ function DashboardPage() {
                   </div>
                   <button
                     onClick={cancelSearch}
-                    className="mt-1 rounded-full border border-zinc-200 px-4 py-1.5 text-xs font-medium text-zinc-500 transition-all hover:border-zinc-400 hover:text-zinc-700"
+                    className="mt-1 rounded-full border border-zinc-200 px-4 py-1.5 text-xs font-medium text-zinc-500 transition-all hover:border-zinc-400 hover:text-zinc-700 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-500 dark:hover:text-zinc-200"
                   >
                     Отменить
                   </button>
@@ -771,8 +816,8 @@ function DashboardPage() {
               </div>
             ) : !searched ? (
               <div className="py-24 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100">
-                  <ArrowUp className="h-7 w-7 text-zinc-300" />
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+                  <ArrowUp className="h-7 w-7 text-zinc-300 dark:text-zinc-600" />
                 </div>
                 <p className="font-medium text-zinc-400">
                   Введите запрос выше
@@ -793,6 +838,27 @@ function DashboardPage() {
               ))
             )}
           </div>
+
+          {/* Промо-баннер после результатов (для незалогиненных или не-про) */}
+          {searched && !loading && tenders.length > 0 && !isPro(userEmail) && (
+            <div className="mt-4 rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50 to-violet-50 p-4 dark:border-blue-900/40 dark:from-blue-950/30 dark:to-violet-950/30">
+              <p className="text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+                {searchesLeft <= 1 && !isAdmin(userEmail) ? (
+                  <>
+                    <span className="font-semibold text-amber-600 dark:text-amber-400">Остался {searchesLeft} {pluralize(searchesLeft, "поиск", "поиска", "поисков")}.</span>{" "}
+                    Подключите Про — безлимитные поиски, уведомления о новых тендерах и AI-прогнозы.{" "}
+                    <Link href="/pricing" className="font-semibold text-blue-600 hover:underline">Всего 990 ₽/мес →</Link>
+                  </>
+                ) : (
+                  <>
+                    Вы нашли <span className="font-semibold text-zinc-800 dark:text-zinc-200">{total} {pluralize(total, "тендер", "тендера", "тендеров")}</span>.
+                    {" "}Сохраните запрос и получайте уведомления о новых —{" "}
+                    <Link href="/pricing" className="font-semibold text-blue-600 hover:underline">подключите Про →</Link>
+                  </>
+                )}
+              </p>
+            </div>
+          )}
 
           {/* Pagination */}
           {searched && !loading && totalPages > 1 && (

@@ -11,14 +11,14 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-50 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
+      <header className="sticky top-0 z-50 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/70">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-950 shadow-sm">
               <Search className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-zinc-900">ГосПоиск</span>
+            <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">ГосПоиск</span>
           </Link>
           <Link href="/">
             <Button variant="outline" size="sm" className="gap-1.5 rounded-full">
@@ -30,11 +30,11 @@ export default function TermsPage() {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
-        <h1 className="mb-2 text-2xl font-bold text-zinc-900 sm:text-3xl">Пользовательское соглашение</h1>
+        <h1 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-white sm:text-3xl">Пользовательское соглашение</h1>
         <p className="mb-1 text-sm text-zinc-500">Публичная оферта</p>
         <p className="mb-8 text-sm text-zinc-400">Последнее обновление: 6 апреля 2026 г.</p>
 
-        <div className="prose-sm space-y-6 text-zinc-600 [&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-zinc-900 [&_li]:ml-4 [&_li]:list-disc [&_p]:leading-relaxed">
+        <div className="prose-sm space-y-6 text-zinc-600 dark:text-zinc-400 [&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-zinc-900 dark:[&_h2]:text-white [&_li]:ml-4 [&_li]:list-disc [&_p]:leading-relaxed">
           <h2>1. Общие положения</h2>
           <p>
             Настоящее Пользовательское соглашение (далее — «Соглашение») является публичной офертой и определяет условия
